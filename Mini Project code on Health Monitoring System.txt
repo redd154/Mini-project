@@ -1,0 +1,338 @@
+==========================================================================================
+ SAMPLE CODE         FOR CONFIGURING GSM MODULE TO ARDUINO 
+
+
+==========================================================================================
+
+
+#include <SoftwareSerial.h>
+
+
+SoftwareSerial mySerial(9, 10);
+
+
+void setup()
+{
+  mySerial.begin(9600);   // Setting the baud rate of GSM Module  
+  Serial.begin(9600);        // Setting the baud rate of Serial Monitor (Arduino)
+  delay(100);
+}
+
+
+
+
+void loop()
+{
+  if (Serial.available()>0)
+   switch(Serial.read())
+  {
+        case 's':
+          SendMessage();
+          break;
+        case 'r':
+          RecieveMessage();
+          break;
+  }
+
+
+ if (mySerial.available()>0)
+   Serial.write(mySerial.read());
+}
+
+
+
+
+ void SendMessage()
+{
+  mySerial.println("AT+CMGF=1");        //Sets the GSM Module in Text Mode
+  delay(1000);  // Delay of 1000 milli seconds or 1 second
+  mySerial.println("AT+CMGS=\"+91xxxxxxxxxx\"\r"); // Replace x with mobile number
+  delay(1000);
+  mySerial.println("I am SMS from GSM Module");// The SMS text you want to send
+  delay(100);
+   mySerial.println((char)26);// ASCII code of CTRL+Z
+  delay(1000);
+}
+
+
+
+
+ void RecieveMessage()
+{
+  mySerial.println("AT+CNMI=2,2,0,0,0"); // AT Command to receive a live SMS
+  delay(1000);
+ }
+
+
+
+
+REFERENCE:-https://www.circuitstoday.com/interface-gsm-module-with-arduino
+
+
+
+
+
+
+==========================================================================================
+
+
+SAMPLE CODE TO CONFIGURE AURDUINO AND HEART BEAT SENSOR
+==========================================================================================
+
+
+
+
+/*
+
+
+* Basic BPM Measurement with Pulse Sensor
+
+
+* Quick Test Sketch for Arduino Uno/Nano
+
+
+* Adapted code - Thanks to Floris Wouterlood
+
+
+* T.K.Hareendran/2019
+
+
+*/
+
+
+
+
+
+
+
+
+int sensorPin = A0;                                    // A0 is the input pin for the heart rate sensor
+
+
+float sensorValue = 0;                                 // Variable to store the value coming from the sensor
+
+
+int count = 9;
+
+
+unsigned long starttime = 0;
+
+
+int heartrate = 0;
+
+
+boolean counted = false;
+
+
+
+
+
+
+
+
+void setup (void) {
+
+
+pinMode (13, OUTPUT);                                  // D13 LED as Status Indicator
+
+
+Serial.begin (9600);                                   // Start Serial Communication @ 9600
+
+
+}
+
+
+
+
+
+
+
+
+void loop (){
+
+
+
+
+
+
+
+
+starttime = millis();
+
+
+
+
+
+
+
+
+while (millis()<starttime+10000)                       // Reading pulse sensor for 10 seconds
+
+
+{
+
+
+sensorValue = analogRead(sensorPin);
+
+
+if (sensorValue > 550 && counted == false)  // Threshold value is 550 (~ 2.7V)
+
+
+{
+
+
+count++;
+
+
+Serial.print ("count = ");
+
+
+Serial.println (count);
+
+
+digitalWrite (13,HIGH);
+
+
+delay (50);
+
+
+digitalWrite (13, LOW);
+
+
+counted = true;
+
+
+}
+
+
+else if (sensorValue < 550)
+
+
+{
+
+
+counted = false;
+
+
+digitalWrite (13, LOW);
+
+
+}
+
+
+}
+
+
+
+
+
+
+
+
+heartrate = count*6;                                   // Multiply the count by 6 to get beats per minute
+
+
+Serial.println ();
+
+
+Serial.print ("BPM = ");
+
+
+Serial.println (heartrate);                            // Display BPM in the Serial Monitor
+
+
+Serial.println ();
+
+
+count = 0;
+
+
+
+
+
+
+
+
+}
+
+
+REFERENCE:-https://www.electroschematics.com/heart-rate-sensor/
+
+
+
+
+==========================================================================================
+
+
+SAMPLE CODE TO DISPLAY HUMIDITY ON LCD
+==========================================================================================
+
+
+#include <dht.h>
+#include <LiquidCrystal.h>
+
+
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+
+
+dht DHT;
+
+
+#define DHT11_PIN 7
+
+
+void setup(){
+  lcd.begin(16, 2);
+}
+
+
+void loop(){
+  int chk = DHT.read11(DHT11_PIN);
+  lcd.setCursor(0,0); 
+  lcd.print("Temp: ");
+  lcd.print(DHT.temperature);
+  lcd.print((char)223);
+  lcd.print("C");
+  lcd.setCursor(0,1);
+  lcd.print("Humidity: ");
+  lcd.print(DHT.humidity);
+  lcd.print("%");
+  delay(1000);
+}
+********NEED TO CONNECT LCD TO AURDINO ,TO DO SO REFER THIS FOR CONNECTIONS BETWEEN LCD AND ARDUINO :-  https://www.circuitbasics.com/how-to-set-up-an-lcd-display-on-an-arduino/ *************
+
+
+
+
+IF TO PRINT ON SERIAL MONITOR USE 
+
+
+
+
+#include <dht.h>
+
+
+dht DHT;
+
+
+#define DHT11_PIN 7
+
+
+void setup(){
+  Serial.begin(9600);
+}
+
+
+void loop(){
+  int chk = DHT.read11(DHT11_PIN);
+  Serial.print("Temperature = ");
+  Serial.println(DHT.temperature);
+  Serial.print("Humidity = ");
+  Serial.println(DHT.humidity);
+  delay(1000);
+}
+
+
+
+
+REFERENCE:-https://www.circuitbasics.com/how-to-set-up-the-dht11-humidity-sensor-on-an-arduino/#:~:text=Before%20you%20can%20use%20the,open%20up%20the%20Arduino%20IDE.
